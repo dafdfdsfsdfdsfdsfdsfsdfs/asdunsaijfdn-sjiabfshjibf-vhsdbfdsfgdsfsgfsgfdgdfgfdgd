@@ -2638,112 +2638,245 @@ end
 			return Keybind
 		end
 		--
-		function Sections:Textbox(Options)
-			local Properties = Options or {}
-			local Textbox = {
-				Window = self.Window,
-				Page = self.Page,
-				Section = self,
-				Placeholder = (
-					Properties.placeholder
-						or Properties.Placeholder
-						or Properties.holder
-						or Properties.Holder
-						or ""
-				),
-				State = (
-					Properties.state
-						or Properties.State
-						or Properties.def
-						or Properties.Def
-						or Properties.default
-						or Properties.Default
-						or ""
-				),
-				Callback = (
-					Properties.callback
-						or Properties.Callback
-						or Properties.callBack
-						or Properties.CallBack
-						or function() end
-				),
-				Flag = (
-					Properties.flag
-						or Properties.Flag
-						or Properties.pointer
-						or Properties.Pointer
-						or Library.NextFlag()
-				),
-			}
+function Sections:Keybind(Options)
+    local Properties = Options or {};
+    local Keybind = {
+        Section = self,
+        Name = Properties.Title or Properties.Name or Properties.title or "Keybind",
+        State = (
+            Properties.state
+                or Properties.State
+                or Properties.def
+                or Properties.Def
+                or Properties.default
+                or Properties.Default
+                or nil
+        ),
+        Mode = (Properties.mode or Properties.Mode or "Toggle"),
+        Callback = (
+            Properties.callback
+                or Properties.Callback
+                or Properties.callBack
+                or Properties.CallBack
+                or function() end
+        ),
+        Flag = (
+            Properties.flag
+                or Properties.Flag
+                or Properties.pointer
+                or Properties.Pointer
+                or Library.NextFlag()
+        ),
+        Binding = nil,
+        Connection = nil,
+    }
+    local Key
+    local State = false
+    local Cycle = Keybind.Mode == "Hold" and 1 or Keybind.Mode == "Toggle" and 2 or 3
 
-			-- // Instances
-			local Holder = Instance.new('Frame', Options.Side == "Left" and Textbox.Section.Elements.Left or Options.Side == "Right" and Textbox.Section.Elements.Right or Textbox.Section.Elements.Left)
-			local TextFrame = Instance.new('Frame', Holder)
-			local Gradient = Instance.new('UIGradient', TextFrame)
-			local TextBox = Instance.new('TextBox', TextFrame)
-			--
-			do -- Inserts
-				table.insert(Library.Instances, TextFrame)
-				table.insert(Library.Instances, TextBox)
-			end
-			--
-			Holder.Name = "Holder"
-			Holder.Size = UDim2.new(1,0,0,15)
-			Holder.BackgroundColor3 = Color3.new(1,1,1)
-			Holder.BackgroundTransparency = 1
-			Holder.BorderSizePixel = 0
-			Holder.BorderColor3 = Color3.new(0,0,0)
-			--
-			TextFrame.Name = "TextFrame"
-			TextFrame.Position = UDim2.new(0,15,0,0)
-			TextFrame.Size = UDim2.new(1,-30,1,0)
-			TextFrame.BackgroundColor3 = Color3.new(0.0784,0.0784,0.0784)
-			TextFrame.BorderColor3 = Color3.new(0,0,0)
-			--
-			Gradient.Name = "Gradient"
-			Gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(
-					0,
-					Color3.new(0.7803921699523926, 0.7490196228027344, 0.800000011920929)	
-				),
-				ColorSequenceKeypoint.new(
-					1,
-					Color3.new(1, 1, 1)	
-				)
-			}
-			Gradient.Rotation = -90
-			--
-			TextBox.Size = UDim2.new(1,0,1,0)
-			TextBox.BackgroundColor3 = Color3.new(1,1,1)
-			TextBox.BackgroundTransparency = 1
-			TextBox.BorderSizePixel = 0
-			TextBox.BorderColor3 = Color3.new(0,0,0)
-			TextBox.Text = Textbox.State
-			TextBox.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-			TextBox.FontFace = Library.UIFont
-			TextBox.TextSize = Library.FontSize
-			TextBox.PlaceholderText = Textbox.Placeholder
-			TextBox.PlaceholderColor3 = Color3.new(0.3059,0.3059,0.3059)
-			TextBox.ClearTextOnFocus = false
-			TextBox.TextWrapped = true
+    -- // Instances
+    local Holder = Instance.new('TextButton', Options.Side == "Left" and Keybind.Section.Elements.Left or Options.Side == "Right" and Keybind.Section.Elements.Right or Keybind.Section.Elements.Left)
+    local Title = Instance.new('TextLabel', Holder)
+    local Value = Instance.new('TextLabel', Holder)
+    local Mode = Instance.new('TextLabel', Holder)
+    --
+    do -- Inserts
+        table.insert(Library.Instances, Title)
+        table.insert(Library.Instances, Value)
+        table.insert(Library.Instances, Mode)
+    end
+    --
+    Holder.Name = "Holder"
+    Holder.Size = UDim2.new(1,0,0,10)
+    Holder.BackgroundColor3 = Color3.new(1,1,1)
+    Holder.BackgroundTransparency = 1
+    Holder.Text = ""
+    Holder.TextColor3 = Color3.new(0,0,0)
+    Holder.AutoButtonColor = false
+    Holder.Font = Enum.Font.SourceSans
+    Holder.TextSize = 14
+    --
+    Title.Name = "Title"
+    Title.Position = UDim2.new(0,15,0,-1)
+    Title.Size = UDim2.new(0.5,-30,1,0)  -- Changed: Take up left half
+    Title.BackgroundColor3 = Color3.new(1,1,1)
+    Title.BackgroundTransparency = 1
+    Title.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+    Title.FontFace = Library.UIFont
+    Title.TextSize = Library.FontSize
+    Title.ZIndex = 105
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.Text = Keybind.Name
+    --
+    Value.Name = "Value"
+    Value.Position = UDim2.new(0.5,0,0,-1)  -- Changed: Start at middle
+    Value.Size = UDim2.new(0.5,-15,1,0)  -- Changed: Take up right half
+    Value.BackgroundColor3 = Color3.new(1,1,1)
+    Value.BackgroundTransparency = 1
+    Value.Text = "[-]"
+    Value.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+    Value.FontFace = Library.UIFont
+    Value.TextSize = Library.FontSize
+    Value.ZIndex = 105
+    Value.TextXAlignment = Enum.TextXAlignment.Right
+    --
+    Mode.Name = "Mode"
+    Mode.Position = UDim2.new(0,Title.TextBounds.X + 20,0,-1)
+    Mode.Size = UDim2.new(1,-30,1,0)
+    Mode.BackgroundColor3 = Color3.new(1,1,1)
+    Mode.BackgroundTransparency = 1
+    Mode.Text = Keybind.Mode == "Hold" and "[H]" or Keybind.Mode == "Toggle" and "" or "[A]"
+    Mode.TextColor3 = Color3.new(1,1,1)
+    Mode.FontFace = Library.UIFont
+    Mode.TextSize = Library.FontSize
+    Mode.ZIndex = 105
+    Mode.TextXAlignment = Enum.TextXAlignment.Left
 
-			-- // Connections
-			TextBox.FocusLost:Connect(function()
-				Textbox.Callback(TextBox.Text)
-				Library.Flags[Textbox.Flag] = TextBox.Text
-			end)
-			--
-			local function set(str)
-				TextBox.Text = str
-				Library.Flags[Textbox.Flag] = str
-				Textbox.Callback(str)
-			end
+    -- // Connections
+    local function set(newkey)
+        if string.find(tostring(newkey), "Enum") then
+            if Keybind.Connection then
+                Keybind.Connection:Disconnect()
+                if Keybind.Flag then
+                    Library.Flags[Keybind.Flag] = false
+                end
+                Keybind.Callback(false)
+            end
+            if tostring(newkey):find("Enum.KeyCode.") then
+                newkey = Enum.KeyCode[tostring(newkey):gsub("Enum.KeyCode.", "")]
+            elseif tostring(newkey):find("Enum.UserInputType.") then
+                newkey = Enum.UserInputType[tostring(newkey):gsub("Enum.UserInputType.", "")]
+            end
+            if newkey == Enum.KeyCode.Backspace then
+                Key = nil
 
-			-- // Return
-			Flags[Textbox.Flag] = set
-			return Textbox
-		end
-		--
+                Value.Text = "[-]"
+            elseif newkey ~= nil then
+                Key = newkey
+
+                local text = (Library.Keys[newkey] or tostring(newkey):gsub("Enum.KeyCode.", ""))
+
+                Value.Text = "[" .. text .. "]"
+            end
+
+            Library.Flags[Keybind.Flag .. "_KEY"] = newkey
+        elseif table.find({ "Always", "Toggle", "Hold" }, newkey) then
+            Library.Flags[Keybind.Flag .. "_KEY STATE"] = newkey
+            Keybind.Mode = newkey
+            Mode.Text = Keybind.Mode == "Hold" and "[H]" or Keybind.Mode == "Toggle" and "" or "[A]"
+            Cycle = Keybind.Mode == "Hold" and 1 or Keybind.Mode == "Toggle" and 2 or 3
+            if Keybind.Mode == "Always" then
+                State = true
+                if Keybind.Flag then
+                    Library.Flags[Keybind.Flag] = State
+                end
+                Keybind.Callback(true)
+            end
+        else
+            State = newkey
+            if Keybind.Flag then
+                Library.Flags[Keybind.Flag] = newkey
+            end
+            Keybind.Callback(newkey)
+        end
+    end
+    --
+    set(Keybind.State)
+    set(Keybind.Mode)
+    Holder.MouseButton1Click:Connect(function()
+        if not Keybind.Binding then
+
+            Value.Text = "[-]"
+
+            Keybind.Binding = Library:Connection(
+                game:GetService("UserInputService").InputBegan,
+                function(input, gpe)
+                    set(
+                        input.UserInputType == Enum.UserInputType.Keyboard and input.KeyCode
+                            or input.UserInputType
+                    )
+                    Library:Disconnect(Keybind.Binding)
+                    task.wait()
+                    Keybind.Binding = nil
+                end
+            )
+        end
+    end)
+    --
+    Library:Connection(game:GetService("UserInputService").InputBegan, function(inp)
+        if (inp.KeyCode == Key or inp.UserInputType == Key) and not Keybind.Binding then
+            if Keybind.Mode == "Hold" then
+                if Keybind.Flag then
+                    Library.Flags[Keybind.Flag] = true
+                end
+                Keybind.Connection = Library:Connection(game:GetService("RunService").RenderStepped, function()
+                    if Keybind.Callback then
+                        Keybind.Callback(true)
+                    end
+                end)
+            elseif Keybind.Mode == "Toggle" then
+                State = not State
+                if Keybind.Flag then
+                    Library.Flags[Keybind.Flag] = State
+                end
+                Keybind.Callback(State)
+            end
+        end
+    end)
+    --
+    Library:Connection(game:GetService("UserInputService").InputEnded, function(inp)
+        if Keybind.Mode == "Hold" then
+            if Key ~= "" or Key ~= nil then
+                if inp.KeyCode == Key or inp.UserInputType == Key then
+                    if Keybind.Connection then
+                        Keybind.Connection:Disconnect()
+                        if Keybind.Flag then
+                            Library.Flags[Keybind.Flag] = false
+                        end
+                        if Keybind.Callback then
+                            Keybind.Callback(false)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+    --
+    Holder.MouseButton2Click:Connect(function()
+        Cycle += 1
+        if Cycle > 3 then
+            Cycle = 1
+            set("Hold")
+            Mode.Text = "[H]"
+        elseif Cycle == 2 then
+            set("Toggle")
+            Mode.Text = ""
+        elseif Cycle == 3 then
+            set("Always")
+            Mode.Text = "[A]"
+        elseif Cycle == 1 then
+            set("Hold")
+            Mode.Text = "[H]"
+        end
+    end)
+    --
+    Library.Flags[Keybind.Flag .. "_KEY"] = Keybind.State
+    Library.Flags[Keybind.Flag .. "_KEY STATE"] = Keybind.Mode
+    Flags[Keybind.Flag] = set
+    Flags[Keybind.Flag .. "_KEY"] = set
+    Flags[Keybind.Flag .. "_KEY STATE"] = set
+    --
+    function Keybind:Set(key)
+        set(key)
+    end
+    local function refresh()
+        wait(0.001)
+        Mode.Position = UDim2.new(0,Title.TextBounds.X + 20,0,-1)
+    end
+    -- // Return
+    refresh()
+    return Keybind
+end
 		function Sections:Button(Options)
 			local Properties = Options or {}
 			local Button = {
