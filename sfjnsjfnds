@@ -1576,251 +1576,290 @@ end
 		end
 		--
 		function Sections:Slider(Options)
-			local Properties = Options or {};
-			local Slider = {
-				Window = self.Window,
-				Page = self.Page,
-				Section = self,
-				Name = Properties.Title or Properties.Name or Properties.title or nil,
-				Min = (Properties.min or Properties.Min or Properties.minimum or Properties.Minimum or 0),
-				State = (
-					Properties.state
-						or Properties.State
-						or Properties.def
-						or Properties.Def
-						or Properties.default
-						or Properties.Default
-						or 10
-				),
-				Max = (Properties.max or Properties.Max or Properties.maximum or Properties.Maximum or 100),
-				Sub = (
-					Properties.suffix
-						or Properties.Suffix
-						or Properties.ending
-						or Properties.Ending
-						or Properties.prefix
-						or Properties.Prefix
-						or Properties.measurement
-						or Properties.Measurement
-						or ""
-				),
-				Decimals = (Properties.decimals or Properties.Decimals or 1),
-				Callback = (
-					Properties.callback
-						or Properties.Callback
-						or Properties.callBack
-						or Properties.CallBack
-						or function() end
-				),
-				Flag = (
-					Properties.flag
-						or Properties.Flag
-						or Properties.pointer
-						or Properties.Pointer
-						or Library.NextFlag()
-				),
-			}
-			local TextValue = ("[value]" .. Slider.Sub)
+    local Properties = Options or {};
+    local Slider = {
+        Window = self.Window,
+        Page = self.Page,
+        Section = self,
+        Name = Properties.Title or Properties.Name or Properties.title or nil,
+        Min = (Properties.min or Properties.Min or Properties.minimum or Properties.Minimum or 0),
+        State = (
+            Properties.state
+                or Properties.State
+                or Properties.def
+                or Properties.Def
+                or Properties.default
+                or Properties.Default
+                or 10
+        ),
+        Max = (Properties.max or Properties.Max or Properties.maximum or Properties.Maximum or 100),
+        Sub = (
+            Properties.suffix
+                or Properties.Suffix
+                or Properties.ending
+                or Properties.Ending
+                or Properties.prefix
+                or Properties.Prefix
+                or Properties.measurement
+                or Properties.Measurement
+                or ""
+        ),
+        Decimals = (Properties.decimals or Properties.Decimals or 1),
+        Callback = (
+            Properties.callback
+                or Properties.Callback
+                or Properties.callBack
+                or Properties.CallBack
+                or function() end
+        ),
+        Flag = (
+            Properties.flag
+                or Properties.Flag
+                or Properties.pointer
+                or Properties.Pointer
+                or Library.NextFlag()
+        ),
+    }
+    local TextValue = ("[value]" .. Slider.Sub)
 
-			-- // Instances
-			local Holder = Instance.new('Frame', Options.Side == "Left" and Slider.Section.Elements.Left or Options.Side == "Right" and Slider.Section.Elements.Right or Slider.Section.Elements.Left)
-			local Frame = Instance.new('TextButton', Holder)
-			local Accent = Instance.new('TextButton', Frame)
-			local Gradient2 = Instance.new('UIGradient', Accent)
-			local Gradient = Instance.new('UIGradient', Frame)
-			local Title = Instance.new('TextLabel', Holder)
-			local plus = Instance.new('TextButton', Holder)
-			local minus = Instance.new('TextButton', Holder)
-			local Value = Instance.new('TextLabel', Slider.Name and Holder or Frame)
-			Title.Visible = false
-			--
-			do -- Inserts
-				table.insert(Library.Instances, Frame)
-				table.insert(Library.Instances, Accent)
-				table.insert(Library.Instances, Title)
-				table.insert(Library.Instances, plus)
-				table.insert(Library.Instances, minus)
-				table.insert(Library.Instances, Value)
-				--
-				table.insert(Library.ThemeObjects, Accent)
-			end
-			--
-			Holder.Name = "Slider"
-			Holder.Size = Slider.Name and UDim2.new(1,0,0,25) or UDim2.new(1,0,0,10)
-			Holder.BackgroundColor3 = Color3.new(1,1,1)
-			Holder.BackgroundTransparency = 1
-			--
-			Frame.Position = Slider.Name and UDim2.new(0,15,0,16) or UDim2.new(0,15,0,3)
-			Frame.Size = UDim2.new(1,-30,0,6)
-			Frame.BackgroundColor3 = Color3.new(0.0784,0.0784,0.0784)
-			Frame.BorderColor3 = Color3.new(0,0,0)
-			Frame.AutoButtonColor = false
-			Frame.Text = ""
-			--
-			Accent.Name = "Accent"
-			Accent.Size = UDim2.new(0,0,1,0)
-			Accent.BackgroundColor3 = Library.Accent
-			Accent.BorderSizePixel = 0
-			Accent.AutoButtonColor = false
-			Accent.Text = ""
-			--
-			Gradient2.Name = "Gradient2"
-			Gradient2.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(
-					0,
-					Color3.new(0.7803921699523926, 0.7490196228027344, 0.800000011920929)	
-				),
-				ColorSequenceKeypoint.new(
-					1,
-					Color3.new(1, 1, 1)	
-				)
-			}
-			Gradient2.Rotation = -90
-			Gradient.Name = "Gradient"
-			Gradient.Color = ColorSequence.new{
-				ColorSequenceKeypoint.new(
-					0,
-					Color3.new(0.7803921699523926, 0.7490196228027344, 0.800000011920929)	
-				),
-				ColorSequenceKeypoint.new(
-					1,
-					Color3.new(1, 1, 1)	
-				)
-			}
-			Gradient.Rotation = -90
-			--
-			if Slider.Name then
-				Title.Visible = true
-				Title.Name = "Title"
-				Title.Position = UDim2.new(0,15,0,0)
-				Title.Size = UDim2.new(1,0,0,10)
-				Title.BackgroundColor3 = Color3.new(1,1,1)
-				Title.BackgroundTransparency = 1
-				Title.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-				Title.FontFace = Library.UIFont
-				Title.TextSize = Library.FontSize
-				Title.ZIndex = 105
-				Title.TextXAlignment = Enum.TextXAlignment.Left
-				Title.Text = Slider.Name
-			end
-			--
-			plus.Name = "plus"
-			plus.Position = Slider.Name and UDim2.new(1,-7,0,13) or UDim2.new(1,-7,0,0)
-			plus.Size = UDim2.new(0,8,0,8)
-			plus.BackgroundColor3 = Color3.new(1,1,1)
-			plus.BackgroundTransparency = 1
-			plus.BorderSizePixel = 0
-			plus.BorderColor3 = Color3.new(0,0,0)
-			plus.Text = "+"
-			plus.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-			plus.FontFace = Library.UIFont
-			plus.TextSize = Library.FontSize
-			--
-			minus.Name = "minus"
-			minus.Position = Slider.Name and UDim2.new(0,-1,0,13) or UDim2.new(0,-1,0,0)
-			minus.Size = UDim2.new(0,8,0,8)
-			minus.BackgroundColor3 = Color3.new(1,1,1)
-			minus.BackgroundTransparency = 1
-			minus.BorderSizePixel = 0
-			minus.BorderColor3 = Color3.new(0,0,0)
-			minus.Text = "-"
-			minus.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-			minus.FontFace = Library.UIFont
-			minus.TextSize = Library.FontSize
-			--
-			Value.Name = "Value"
-			Value.Position = Slider.Name and UDim2.new(0,15,0,0) or UDim2.new(0,0,0,-1)
-			Value.Size = Slider.Name and UDim2.new(1,-30,0,10) or UDim2.new(1,0,1,0)
-			Value.BackgroundColor3 = Color3.new(1,1,1)
-			Value.BackgroundTransparency = 1
-			Value.Text = "50%"
-			Value.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-			Value.FontFace = Library.UIFont
-			Value.TextSize = Library.FontSize
-			Value.ZIndex = 105
-			Value.TextXAlignment = Slider.Name and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center
+    -- // Instances
+    local Holder = Instance.new('Frame', Options.Side == "Left" and Slider.Section.Elements.Left or Options.Side == "Right" and Slider.Section.Elements.Right or Slider.Section.Elements.Left)
+    local Frame = Instance.new('TextButton', Holder)
+    local Accent = Instance.new('TextButton', Frame)
+    local Gradient2 = Instance.new('UIGradient', Accent)
+    local Gradient = Instance.new('UIGradient', Frame)
+    local Title = Instance.new('TextLabel', Holder)
+    local plus = Instance.new('TextButton', Holder)
+    local minus = Instance.new('TextButton', Holder)
+    local Value = Instance.new('TextLabel', Slider.Name and Holder or Frame)
+    local ValueBox = Instance.new('TextBox', Value)
+    Title.Visible = false
+    --
+    do -- Inserts
+        table.insert(Library.Instances, Frame)
+        table.insert(Library.Instances, Accent)
+        table.insert(Library.Instances, Title)
+        table.insert(Library.Instances, plus)
+        table.insert(Library.Instances, minus)
+        table.insert(Library.Instances, Value)
+        table.insert(Library.Instances, ValueBox)
+        --
+        table.insert(Library.ThemeObjects, Accent)
+    end
+    --
+    Holder.Name = "Slider"
+    Holder.Size = Slider.Name and UDim2.new(1,0,0,25) or UDim2.new(1,0,0,10)
+    Holder.BackgroundColor3 = Color3.new(1,1,1)
+    Holder.BackgroundTransparency = 1
+    --
+    Frame.Position = Slider.Name and UDim2.new(0,15,0,16) or UDim2.new(0,15,0,3)
+    Frame.Size = UDim2.new(1,-30,0,6)
+    Frame.BackgroundColor3 = Color3.new(0.0784,0.0784,0.0784)
+    Frame.BorderColor3 = Color3.new(0,0,0)
+    Frame.AutoButtonColor = false
+    Frame.Text = ""
+    --
+    Accent.Name = "Accent"
+    Accent.Size = UDim2.new(0,0,1,0)
+    Accent.BackgroundColor3 = Library.Accent
+    Accent.BorderSizePixel = 0
+    Accent.AutoButtonColor = false
+    Accent.Text = ""
+    --
+    Gradient2.Name = "Gradient2"
+    Gradient2.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(
+            0,
+            Color3.new(0.7803921699523926, 0.7490196228027344, 0.800000011920929)	
+        ),
+        ColorSequenceKeypoint.new(
+            1,
+            Color3.new(1, 1, 1)	
+        )
+    }
+    Gradient2.Rotation = -90
+    Gradient.Name = "Gradient"
+    Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(
+            0,
+            Color3.new(0.7803921699523926, 0.7490196228027344, 0.800000011920929)	
+        ),
+        ColorSequenceKeypoint.new(
+            1,
+            Color3.new(1, 1, 1)	
+        )
+    }
+    Gradient.Rotation = -90
+    --
+    if Slider.Name then
+        Title.Visible = true
+        Title.Name = "Title"
+        Title.Position = UDim2.new(0,15,0,0)
+        Title.Size = UDim2.new(1,0,0,10)
+        Title.BackgroundColor3 = Color3.new(1,1,1)
+        Title.BackgroundTransparency = 1
+        Title.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+        Title.FontFace = Library.UIFont
+        Title.TextSize = Library.FontSize
+        Title.ZIndex = 105
+        Title.TextXAlignment = Enum.TextXAlignment.Left
+        Title.Text = Slider.Name
+    end
+    --
+    plus.Name = "plus"
+    plus.Position = Slider.Name and UDim2.new(1,-7,0,13) or UDim2.new(1,-7,0,0)
+    plus.Size = UDim2.new(0,8,0,8)
+    plus.BackgroundColor3 = Color3.new(1,1,1)
+    plus.BackgroundTransparency = 1
+    plus.BorderSizePixel = 0
+    plus.BorderColor3 = Color3.new(0,0,0)
+    plus.Text = "+"
+    plus.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+    plus.FontFace = Library.UIFont
+    plus.TextSize = Library.FontSize
+    --
+    minus.Name = "minus"
+    minus.Position = Slider.Name and UDim2.new(0,-1,0,13) or UDim2.new(0,-1,0,0)
+    minus.Size = UDim2.new(0,8,0,8)
+    minus.BackgroundColor3 = Color3.new(1,1,1)
+    minus.BackgroundTransparency = 1
+    minus.BorderSizePixel = 0
+    minus.BorderColor3 = Color3.new(0,0,0)
+    minus.Text = "-"
+    minus.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+    minus.FontFace = Library.UIFont
+    minus.TextSize = Library.FontSize
+    --
+    Value.Name = "Value"
+    Value.Position = Slider.Name and UDim2.new(0,15,0,0) or UDim2.new(0,0,0,-1)
+    Value.Size = Slider.Name and UDim2.new(1,-30,0,10) or UDim2.new(1,0,1,0)
+    Value.BackgroundColor3 = Color3.new(1,1,1)
+    Value.BackgroundTransparency = 1
+    Value.Text = "50%"
+    Value.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+    Value.FontFace = Library.UIFont
+    Value.TextSize = Library.FontSize
+    Value.ZIndex = 105
+    Value.TextXAlignment = Slider.Name and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center
+    
+    -- NEW: TextBox for editing value
+    ValueBox.Name = "ValueBox"
+    ValueBox.Size = UDim2.new(1,0,1,0)
+    ValueBox.BackgroundColor3 = Color3.new(1,1,1)
+    ValueBox.BackgroundTransparency = 1
+    ValueBox.BorderSizePixel = 0
+    ValueBox.Text = ""
+    ValueBox.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+    ValueBox.FontFace = Library.UIFont
+    ValueBox.TextSize = Library.FontSize
+    ValueBox.ZIndex = 106
+    ValueBox.TextXAlignment = Slider.Name and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center
+    ValueBox.ClearTextOnFocus = false
+    ValueBox.Visible = false
 
-			-- // Connections
-			local Sliding = false
-			local Val = Slider.State;
-			local function Set(value)
-				value = math.clamp(Library:Round(value, Slider.Decimals), Slider.Min, Slider.Max)
+    -- // Connections
+    local Sliding = false
+    local Val = Slider.State;
+    local function Set(value)
+        value = math.clamp(Library:Round(value, Slider.Decimals), Slider.Min, Slider.Max)
 
-				if value == Slider.Min then
-					Value.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-					if Slider.Name then
-						Title.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-					end
-				else
-					Value.TextColor3 = Color3.fromRGB(255,255,255)
-					if Slider.Name then
-						Title.TextColor3 = Color3.fromRGB(255,255,255)
-					end
-				end
+        if value == Slider.Min then
+            Value.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+            ValueBox.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+            if Slider.Name then
+                Title.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
+            end
+        else
+            Value.TextColor3 = Color3.fromRGB(255,255,255)
+            ValueBox.TextColor3 = Color3.fromRGB(255,255,255)
+            if Slider.Name then
+                Title.TextColor3 = Color3.fromRGB(255,255,255)
+            end
+        end
 
-				Value.Text = TextValue:gsub("%[value%]", string.format("%.14g", value))
-				Val = value
+        Value.Text = TextValue:gsub("%[value%]", string.format("%.14g", value))
+        ValueBox.Text = string.format("%.14g", value)
+        Val = value
 
-				local sizeX = ((value - Slider.Min) / (Slider.Max - Slider.Min))
-				Accent.Size = UDim2.new(sizeX, 0, 1, 0)
+        local sizeX = ((value - Slider.Min) / (Slider.Max - Slider.Min))
+        Accent.Size = UDim2.new(sizeX, 0, 1, 0)
 
-				Library.Flags[Slider.Flag] = value
-				Slider.Callback(value)
-			end
-			--
-			Set(Slider.State)
-			--
-			local function Slide(input)
-				local sizeX = (input.Position.X - Frame.AbsolutePosition.X) / Frame.AbsoluteSize.X
-				local value = ((Slider.Max - Slider.Min) * sizeX) + Slider.Min
-				Set(value)
-			end
-			--
-			Library:Connection(Frame.InputBegan, function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					Sliding = true
-					Slide(input)
-				end
-			end)
-			Library:Connection(Frame.InputEnded, function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					Sliding = false
-				end
-			end)
-			Library:Connection(Accent.InputBegan, function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					Sliding = true
-					Slide(input)
-				end
-			end)
-			Library:Connection(Accent.InputEnded, function(input)
-				if input.UserInputType == Enum.UserInputType.MouseButton1 then
-					Sliding = false
-				end
-			end)
-			Library:Connection(game:GetService("UserInputService").InputChanged, function(input)
-				if input.UserInputType == Enum.UserInputType.MouseMovement then
-					if Sliding then
-						Slide(input)
-					end
-				end
-			end)
-			Library:Connection(plus.MouseButton1Click, function()
-				Set(Val + 1)
-			end)
-			Library:Connection(minus.MouseButton1Click, function()
-				Set(Val - 1)
-			end)
-			--
-			function Slider:Set(Value)
-				Set(Value)
-			end
-			--
-			Flags[Slider.Flag] = Set
+        Library.Flags[Slider.Flag] = value
+        Slider.Callback(value)
+    end
+    --
+    Set(Slider.State)
+    --
+    local function Slide(input)
+        local sizeX = (input.Position.X - Frame.AbsolutePosition.X) / Frame.AbsoluteSize.X
+        local value = ((Slider.Max - Slider.Min) * sizeX) + Slider.Min
+        Set(value)
+    end
+    --
+    
+    -- NEW: Click on value to edit
+    Value.MouseButton1Click:Connect(function()
+        Value.Visible = false
+        ValueBox.Visible = true
+        ValueBox:CaptureFocus()
+    end)
+    
+    ValueBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local newValue = tonumber(ValueBox.Text)
+            if newValue then
+                Set(newValue)
+            end
+        end
+        Value.Visible = true
+        ValueBox.Visible = false
+    end)
+    
+    Library:Connection(Frame.InputBegan, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Sliding = true
+            Slide(input)
+        end
+    end)
+    Library:Connection(Frame.InputEnded, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Sliding = false
+        end
+    end)
+    Library:Connection(Accent.InputBegan, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Sliding = true
+            Slide(input)
+        end
+    end)
+    Library:Connection(Accent.InputEnded, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Sliding = false
+        end
+    end)
+    Library:Connection(game:GetService("UserInputService").InputChanged, function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            if Sliding then
+                Slide(input)
+            end
+        end
+    end)
+    Library:Connection(plus.MouseButton1Click, function()
+        Set(Val + 1)
+    end)
+    Library:Connection(minus.MouseButton1Click, function()
+        Set(Val - 1)
+    end)
+    --
+    function Slider:Set(Value)
+        Set(Value)
+    end
+    --
+    Flags[Slider.Flag] = Set
 
-			-- // Returning
-			return Slider
-		end
+    -- // Returning
+    return Slider
+end
 		--
 		function Sections:List(Options)
 			local Properties = Options or {};
