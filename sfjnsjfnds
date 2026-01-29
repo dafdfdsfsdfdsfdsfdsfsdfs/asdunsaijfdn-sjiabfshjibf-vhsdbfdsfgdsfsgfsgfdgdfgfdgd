@@ -1615,7 +1615,7 @@ end
         Flag = (
             Properties.flag
                 or Properties.Flag
-                or Properties.pointer
+            or Properties.pointer
                 or Properties.Pointer
                 or Library.NextFlag()
         ),
@@ -1631,8 +1631,7 @@ end
     local Title = Instance.new('TextLabel', Holder)
     local plus = Instance.new('TextButton', Holder)
     local minus = Instance.new('TextButton', Holder)
-    local Value = Instance.new('TextLabel', Slider.Name and Holder or Frame)
-    local ValueBox = Instance.new('TextBox', Value)
+    local Value = Instance.new('TextBox', Slider.Name and Holder or Frame)  -- Changed to TextBox
     Title.Visible = false
     --
     do -- Inserts
@@ -1642,7 +1641,6 @@ end
         table.insert(Library.Instances, plus)
         table.insert(Library.Instances, minus)
         table.insert(Library.Instances, Value)
-        table.insert(Library.Instances, ValueBox)
         --
         table.insert(Library.ThemeObjects, Accent)
     end
@@ -1741,21 +1739,9 @@ end
     Value.TextSize = Library.FontSize
     Value.ZIndex = 105
     Value.TextXAlignment = Slider.Name and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center
-    
-    -- NEW: TextBox for editing value
-    ValueBox.Name = "ValueBox"
-    ValueBox.Size = UDim2.new(1,0,1,0)
-    ValueBox.BackgroundColor3 = Color3.new(1,1,1)
-    ValueBox.BackgroundTransparency = 1
-    ValueBox.BorderSizePixel = 0
-    ValueBox.Text = ""
-    ValueBox.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-    ValueBox.FontFace = Library.UIFont
-    ValueBox.TextSize = Library.FontSize
-    ValueBox.ZIndex = 106
-    ValueBox.TextXAlignment = Slider.Name and Enum.TextXAlignment.Right or Enum.TextXAlignment.Center
-    ValueBox.ClearTextOnFocus = false
-    ValueBox.Visible = false
+    -- NEW: TextBox properties
+    Value.ClearTextOnFocus = false
+    Value.Visible = true
 
     -- // Connections
     local Sliding = false
@@ -1765,20 +1751,17 @@ end
 
         if value == Slider.Min then
             Value.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
-            ValueBox.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
             if Slider.Name then
                 Title.TextColor3 = Color3.new(0.3059,0.3059,0.3059)
             end
         else
             Value.TextColor3 = Color3.fromRGB(255,255,255)
-            ValueBox.TextColor3 = Color3.fromRGB(255,255,255)
             if Slider.Name then
                 Title.TextColor3 = Color3.fromRGB(255,255,255)
             end
         end
 
         Value.Text = TextValue:gsub("%[value%]", string.format("%.14g", value))
-        ValueBox.Text = string.format("%.14g", value)
         Val = value
 
         local sizeX = ((value - Slider.Min) / (Slider.Max - Slider.Min))
@@ -1797,22 +1780,20 @@ end
     end
     --
     
-    -- NEW: Click on value to edit
-    Value.MouseButton1Click:Connect(function()
-        Value.Visible = false
-        ValueBox.Visible = true
-        ValueBox:CaptureFocus()
-    end)
-    
-    ValueBox.FocusLost:Connect(function(enterPressed)
+    -- NEW: TextBox value editing
+    Value.FocusLost:Connect(function(enterPressed)
         if enterPressed then
-            local newValue = tonumber(ValueBox.Text)
+            local newValue = tonumber(Value.Text:gsub("%%", ""):gsub(Slider.Sub, ""))
             if newValue then
                 Set(newValue)
+            else
+                -- Reset to current value if invalid input
+                Set(Val)
             end
+        else
+            -- Reset to current value if focus lost without enter
+            Set(Val)
         end
-        Value.Visible = true
-        ValueBox.Visible = false
     end)
     
     Library:Connection(Frame.InputBegan, function(input)
