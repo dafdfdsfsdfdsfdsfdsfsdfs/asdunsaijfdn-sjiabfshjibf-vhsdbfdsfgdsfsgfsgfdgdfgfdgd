@@ -1677,7 +1677,7 @@ end
     }
     Gradient2.Rotation = -90
     Gradient.Name = "Gradient"
-    Gradient.Color = ColorSequence.new{
+    Gradient.Color = ColorSequence new{
         ColorSequenceKeypoint.new(
             0,
             Color3.new(0.7803921699523926, 0.7490196228027344, 0.800000011920929)	
@@ -1746,7 +1746,26 @@ end
     -- // Connections
     local Sliding = false
     local Val = Slider.State;
-    local function Set(value)
+    
+    -- MODIFIED: Set function that respects text input overrides
+    local function Set(value, fromTextBox)
+        if fromTextBox then
+            -- FORCE exact value when coming from text box, ignore decimals and constraints
+            Val = value
+            Value.Text = tostring(value) .. Slider.Sub
+            
+            -- Update slider position regardless of min/max
+            local normalizedValue = value
+            local sizeX = normalizedValue / Slider.Max
+            Accent.Size = UDim2.new(math.clamp(sizeX, 0, 1), 0, 1, 0)
+            
+            -- Force the flag and callback with exact value
+            Library.Flags[Slider.Flag] = value
+            Slider.Callback(value)
+            return
+        end
+        
+        -- Normal slider behavior for dragging
         value = math.clamp(Library:Round(value, Slider.Decimals), Slider.Min, Slider.Max)
 
         if value == Slider.Min then
@@ -1780,27 +1799,22 @@ end
     end
     --
     
-    -- FIXED: TextBox value editing - now properly updates slider position
+    -- MODIFIED: Text input now forces exact value
     Value.FocusLost:Connect(function(enterPressed)
         if enterPressed then
-            local newValue = tonumber(Value.Text:gsub("%%", ""):gsub(Slider.Sub, ""))
+            -- Get raw number from text
+            local cleanText = Value.Text:gsub("%%", ""):gsub(Slider.Sub, ""):match("^%s*(.-)%s*$")
+            local newValue = tonumber(cleanText)
+            
             if newValue then
-                Set(newValue)  -- This will now properly update both text and slider position
+                Set(newValue, true)  -- Pass true to force exact value
             else
-                -- Reset to current value if invalid input
-                Set(Val)
+                -- Reset to current value if invalid
+                Value.Text = TextValue:gsub("%[value%]", string.format("%.14g", Val))
             end
         else
             -- Reset to current value if focus lost without enter
-            Set(Val)
-        end
-    end)
-    
-    -- NEW: Allow Enter key to confirm input
-    Value:GetPropertyChangedSignal("Text"):Connect(function()
-        if Value.Text:match("\n") then
-            Value.Text = Value.Text:gsub("\n", "")
-            Value:ReleaseFocus()
+            Value.Text = TextValue:gsub("%[value%]", string.format("%.14g", Val))
         end
     end)
     
