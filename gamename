@@ -1,0 +1,7 @@
+return {
+    [2788229376] = "Dahood",
+    [73285039277655] = "Deehood",
+    [77120821957096] = "DasHood",
+    [] = "ZeeHood",
+    [9825515356] = "HoodCustom",
+}
